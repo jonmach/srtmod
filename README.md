@@ -9,7 +9,7 @@ This routine allows you to take an existing .srt file and add a time offset.
 Written in Python3
 
 Usage:
-                python3 srtmod.py -i <inputfile.srt> -o <outputfile.srt> -t <offset>
+                python3 srtmod.py -i inputfile.srt -o outputfile.srt -t offset
 
                 the Offset is in the form HH:MM:SS,mmm
 
