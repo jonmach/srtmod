@@ -31,7 +31,7 @@ from collections import namedtuple
 subTitle = namedtuple('subTitle', 'number start end content')
 
 def parseArgs():
-	parser = argparse.ArgumentParser(prog='srtmod',description='SRT Subtitles Modifierr')
+	parser = argparse.ArgumentParser(prog='srtmod',description='SRT Subtitles Modifier')
 	parser.add_argument(
 		'-i',
 		'--input-file',
