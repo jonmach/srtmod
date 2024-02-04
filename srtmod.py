@@ -91,8 +91,8 @@ def writeSubs(opTimeDelta,subs,f,offsetTime):
 			offsetTime.hour
 		)
 		# Now process start and end
-		newStart = dateTimeToStr(timePlusDelta(subs[i].start, offsetTimeDelta))
-		newEnd = dateTimeToStr(timePlusDelta(subs[i].end, offsetTimeDelta))
+		newStart = dateTimeToStr(opTimeDelta(subs[i].start, offsetTimeDelta))
+		newEnd = dateTimeToStr(opTimeDelta(subs[i].end, offsetTimeDelta))
 
 		f.write("%s --> %s\n" % (newStart, newEnd))					# Time subtitle should stay on for
 		for l in range(len(subs[i].content)):
