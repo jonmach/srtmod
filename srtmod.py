@@ -8,9 +8,12 @@
 # Written in Python3
 #
 # Usage:
-#		python3 srtmod.py -i <inputfile.srt> -o <outputfile.srt> -t <offset>
+#		python3 [-h] srtmod.py -i <inputfile.srt> -o <outputfile.srt> -t <offset> [-n]
 #
 #		the Offset is in the form HH:MM:SS,mmm
+#
+#       '-h' : show srtmod usage
+#       '-n' : to offset in a negative direction
 #
 # The idea for the general parsing routing taken from a posting by roippi (http://stackoverflow.com/users/2581969/roippi)
 #  http://stackoverflow.com/questions/23620423/parsing-a-srt-file-with-regex/23620587#23620587
