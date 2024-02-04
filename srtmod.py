@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 #
 # Python routine to add an offset to a .srt file.
 #
@@ -24,14 +25,13 @@
 import sys
 import datetime
 import argparse
-from datetime import datetime
 from itertools import groupby
 from collections import namedtuple
 
 subTitle = namedtuple('subTitle', 'number start end content')
 
 def parseArgs():
-	parser = argparse.ArgumentParser(prog='srtmod',description='SRT Subtitles Modifier')
+	parser = argparse.ArgumentParser(prog='srtmod.py',description='SRT Subtitles Modifier')
 	parser.add_argument(
 		'-i',
 		'--input-file',
@@ -50,19 +50,25 @@ def parseArgs():
 		metavar='timeskip',
 		required=True
 	)
+	parser.add_argument(
+		'-n',
+		'--negative-timeskip',
+		action='store_true',
+		required=False
+	)
 	return parser.parse_args()
 
 def strToDateTime(str):
-	return datetime.strptime(str, "%H:%M:%S,%f")
+	return datetime.datetime.strptime(str, "%H:%M:%S,%f")
 
 def dateTimeToStr(dateTime):
 	return dateTime.strftime("%H:%M:%S,%f")[0:12]	# Return first 12 characters (microseconds screw up the output)
 
-# Who the hell decided on the order of arguments for timedelta. WTF?
-# class timedelta( 	[days[, seconds[, microseconds[, milliseconds[, minutes[, hours[, weeks]]]]]]])
-def timePlusDelta(sourceTime, osTime):
-	dt=strToDateTime(sourceTime)
-	return dt + datetime.timedelta(0, osTime.second, osTime.microsecond, 0, osTime.minute, osTime.hour)
+def timePlusDelta(sourceTime, osTimeDelta):
+	return strToDateTime(sourceTime) + osTimeDelta
+
+def timeMinusDelta(sourceTime, osTimeDelta):
+	return strToDateTime(sourceTime) - osTimeDelta
 
 def extractSub(sub):
 	sub = [x.strip() for x in sub]
@@ -70,13 +76,23 @@ def extractSub(sub):
 	start, end = start_end.split(' --> ')
 	return subTitle(number, start, end, content)
 
-def writeSubs(subs,f,offsetTime):
+def writeSubs(opTimeDelta,subs,f,offsetTime):
 	for i in range(len(subs)):
 		f.write("%s\n" % subs[i].number)						# Subtitle number
 
+		# Who the hell decided on the order of arguments for timedelta. WTF?
+		# class timedelta( 	[days[, seconds[, microseconds[, milliseconds[, minutes[, hours[, weeks]]]]]]])
+		offsetTimeDelta = datetime.timedelta(
+			0,
+			offsetTime.second,
+			offsetTime.microsecond,
+			0,
+			offsetTime.minute,
+			offsetTime.hour
+		)
 		# Now process start and end
-		newStart = dateTimeToStr(timePlusDelta(subs[i].start, offsetTime))
-		newEnd = dateTimeToStr(timePlusDelta(subs[i].end, offsetTime))
+		newStart = dateTimeToStr(timePlusDelta(subs[i].start, offsetTimeDelta))
+		newEnd = dateTimeToStr(timePlusDelta(subs[i].end, offsetTimeDelta))
 
 		f.write("%s --> %s\n" % (newStart, newEnd))					# Time subtitle should stay on for
 		for l in range(len(subs[i].content)):
@@ -86,10 +102,14 @@ def writeSubs(subs,f,offsetTime):
 def main():
 	args = parseArgs()
 
-	print("args.input_file = ", args.input_file)
-	print("args.output_file = ", args.output_file)
-	print("offset = ", args.timeskip)
+	print('inFile = {}'.format(args.input_file))
+	print('outFile = {}'.format(args.output_file))
+	print('offset = {}'.format(args.timeskip))
+	print('NegativeTimeSkip = {}'.format(args.negative_timeskip))
 
+	opTimeDelta = timePlusDelta
+	if args.negative_timeskip:
+		opTimeDelta = timeMinusDelta
 	offsetTime = strToDateTime(args.timeskip)
 
 	# Get each line in (from the input file)
@@ -105,7 +125,7 @@ def main():
 	# Create the destination file
 	with open(args.output_file, "w") as f:
 		# Now process each line
-		writeSubs(subs,f,offsetTime)
+		writeSubs(opTimeDelta,subs,f,offsetTime)
 
 if __name__ == '__main__':
 	main()
